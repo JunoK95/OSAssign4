@@ -24,9 +24,18 @@ void *monte_carlo(void* arg){
     _totalpointCount++;
     double x = rng();
     double y = rng();
+
+    printf("random x %f\n", x);
+    printf("random y %f\n", y);
     //printf("total point counter %d\n", _totalpointCount);
     //TODO: figure out algorithm with 0 to 1 square
-
+    signed double dist = ((x - 0.5) * (x - 0.5)) + ((y - 0.5) * (y - 0.5));
+    printf("distance %f\n", dist );
+    if ((dist) < 0.25){
+      _circlepointCount++;
+    }
+    printf("total points %d\n", _totalpointCount);
+    printf("circle points %d\n", _circlepointCount);
     clock_t difference = clock() - before;
     msec = difference * 1000 / CLOCKS_PER_SEC;
   } while (msec < trigger);
@@ -64,6 +73,8 @@ int main(int argc, char **argv){
   for (i = 0; i < threadCount; i++) {
       pthread_join(tid[i],NULL);
   }
+  int division = 4 * (_circlepointCount/_totalpointCount);
+  printf("%d\n", division );
   printf("%s\n", "done");
   pthread_mutex_destroy(&lock);
   return 0;
