@@ -25,17 +25,16 @@ void *monte_carlo(void* arg){
     double x = rng();
     double y = rng();
 
-    printf("random x %f\n", x);
-    printf("random y %f\n", y);
+    // printf("random x %f\n", x - 0.5);
+    // printf("random y %f\n", y - 0.5);
     //printf("total point counter %d\n", _totalpointCount);
-    //TODO: figure out algorithm with 0 to 1 square
-    signed double dist = ((x - 0.5) * (x - 0.5)) + ((y - 0.5) * (y - 0.5));
-    printf("distance %f\n", dist );
+    double dist = ((x - 0.5) * (x - 0.5)) + ((y - 0.5) * (y - 0.5));
+    // printf("distance %f\n", dist );
     if ((dist) < 0.25){
       _circlepointCount++;
     }
-    printf("total points %d\n", _totalpointCount);
-    printf("circle points %d\n", _circlepointCount);
+    // printf("total points %d\n", _totalpointCount);
+    // printf("circle points %d\n", _circlepointCount);
     clock_t difference = clock() - before;
     msec = difference * 1000 / CLOCKS_PER_SEC;
   } while (msec < trigger);
@@ -53,7 +52,7 @@ int main(int argc, char **argv){
   }
 
   if (pthread_mutex_init(&lock, NULL) != 0){
-    printf("%s\n", "mutex init failed");
+    // printf("%s\n", "mutex init failed");
     return 1;
   }
 
@@ -66,16 +65,16 @@ int main(int argc, char **argv){
   for (i = 0; i < threadCount; i++) {
       error = pthread_create(&(tid[i]), NULL, &monte_carlo, &secondLimit);
       if (error != 0){
-        printf("%s\n", "tread can't be created");
+        // printf("%s\n", "tread can't be created");
       }
   }
 
   for (i = 0; i < threadCount; i++) {
       pthread_join(tid[i],NULL);
   }
-  int division = 4 * (_circlepointCount/_totalpointCount);
-  printf("%d\n", division );
-  printf("%s\n", "done");
+  double division = 4 * ((double)_circlepointCount/(double)_totalpointCount);
+  printf("%f\n", division );
+  // printf("%s\n", "done");
   pthread_mutex_destroy(&lock);
   return 0;
 }
