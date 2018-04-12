@@ -7,6 +7,7 @@
 #include <assert.h>
 
 signed int threadCount;
+int boolswitch = 1;
 volatile int Number[99];
 volatile int entering[99];
 
@@ -53,17 +54,22 @@ void critical_section(int thread) {
     in_cs=0;
     // printf("%d using resource...\n", thread);
     csCount[thread]++;
-    printf("in cs %d times\n", csCount[thread]);
     __sync_synchronize();
 }
 
 void *thread_body(void *arg) {
-  while(1){
+  // int msec = 0;
+  // int trigger = secs * 1000;
+  // clock_t before = clock();
+  while(boolswitch){
     long thread = (long)arg;
     lock(thread);
     critical_section(thread);
     unlock(thread);
-  }
+    // clock_t difference = clock() - before;
+    // msec = difference * 1000 / CLOCKS_PER_SEC;
+  } //while (msec < trigger);
+  return 0;
 }
 
 int main(int argc, char **argv) {
@@ -72,8 +78,7 @@ int main(int argc, char **argv) {
       exit(-1);
     }
     threadCount = atoi(argv[1]);
-    long long int secondLimit = atoll(argv[2]);
-    printf("%lli\n", secondLimit );
+    int secondLimit = atoi(argv[2]);
 
     pthread_t threads[threadCount];
     int i = 0;
@@ -82,12 +87,12 @@ int main(int argc, char **argv) {
         pthread_create(&threads[i], NULL, &thread_body, (void*)((long)i));
     }
 
-    for (i = 0; i < threadCount; ++i) {
-        pthread_join(threads[i], NULL);
-    }
+    sleep(secondLimit);
+    boolswitch = 0;
 
     for (i = 0; i < threadCount; ++i) {
-      printf("in cs %d times\n", csCount[i]);
+        pthread_join(threads[i], NULL);
+        printf("%d in cs %d times\n", i,csCount[i]);
     }
 
     return 0;

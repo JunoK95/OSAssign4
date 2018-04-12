@@ -10,36 +10,40 @@ signed int threadCount;
 volatile int Number[99];
 volatile int entering[99];
 
-int boolswitch = 1;
 volatile int csCount[99];
 volatile int in_cs = 0;
+int boolswitch = 1;
+
+void mfence (void) {
+  asm volatile ("mfence" : : : "memory");
+}
 
 void lock(int thread) {
     entering[thread] = 1;
-    __sync_synchronize();
+    mfence();
     int max_ticket = 0;
     int i = 0;
     for (i = 0; i < threadCount; ++i) {
         int ticket = Number[i];
         max_ticket = ticket > max_ticket ? ticket : max_ticket;
-        sched_yield();
     }
+
     Number[thread] = max_ticket + 1;
-    __sync_synchronize();
+    mfence();;
     entering[thread] = 0;
-    __sync_synchronize();
+    mfence();
     int j = 0;
     for (j = 0; j < threadCount; ++j) {
-        while (entering[j]) { sched_yield();}
-        __sync_synchronize();
+        while (entering[j]) { }
+        mfence();
         while (Number[j] != 0 &&
                (Number[j] < Number[thread] ||
-                (Number[j] == Number[thread] && j < thread))) { sched_yield();}
+                (Number[j] == Number[thread] && j < thread))) { }
     }
 }
 
 void unlock(int thread) {
-    __sync_synchronize();
+    mfence();
     Number[thread] = 0;
 }
 
@@ -55,7 +59,7 @@ void critical_section(int thread) {
     in_cs=0;
     // printf("%d using resource...\n", thread);
     csCount[thread]++;
-    __sync_synchronize();
+    mfence();
 }
 
 void *thread_body(void *arg) {
@@ -88,10 +92,7 @@ int main(int argc, char **argv) {
 
     for (i = 0; i < threadCount; ++i) {
         pthread_join(threads[i], NULL);
-    }
-
-    for (i = 0; i < threadCount; ++i) {
-      printf("%d in cs %d times\n", i, csCount[i]);
+        printf("%d in cs %d times\n", i,csCount[i]);
     }
 
     return 0;
