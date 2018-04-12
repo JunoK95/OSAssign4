@@ -29,16 +29,14 @@ void lock(int thread) {
     }
 
     Number[thread] = max_ticket + 1;
-    mfence();;
+    mfence();
     entering[thread] = 0;
     mfence();
     int j = 0;
     for (j = 0; j < threadCount; ++j) {
         while (entering[j]) { }
         mfence();
-        while (Number[j] != 0 &&
-               (Number[j] < Number[thread] ||
-                (Number[j] == Number[thread] && j < thread))) { }
+        while (Number[j] != 0 && (Number[j] < Number[thread] || (Number[j] == Number[thread] && j < thread))) { }
     }
 }
 

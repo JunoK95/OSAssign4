@@ -31,9 +31,7 @@ void lock(int thread) {
     for (j = 0; j < threadCount; ++j) {
         while (entering[j]) { }
         __sync_synchronize();
-        while (Number[j] != 0 &&
-               (Number[j] < Number[thread] ||
-                (Number[j] == Number[thread] && j < thread))) { }
+        while (Number[j] != 0 && (Number[j] < Number[thread] || (Number[j] == Number[thread] && j < thread))) { }
     }
 }
 
